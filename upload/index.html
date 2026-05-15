@@ -1,0 +1,2168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlowTrack Pro - Neumorphic Project Management</title>
+    <style>
+        :root {
+            --bg: #e0e5ec;
+            --bg-dark: #c8ccd4;
+            --shadow-dark: #a3b1c6;
+            --shadow-light: #ffffff;
+            --text-primary: #2d3748;
+            --text-secondary: #718096;
+            --text-muted: rgba(45, 55, 72, 0.4);
+            --accent: #667eea;
+            --accent-light: #7f9cf5;
+            --success: #48bb78;
+            --warning: #ed8936;
+            --danger: #fc8181;
+            --info: #63b3ed;
+            --neu-flat: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+            --neu-pressed: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+            --neu-concave: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light), inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+            --neu-convex: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light), inset -2px -2px 4px var(--shadow-dark), inset 2px 2px 4px var(--shadow-light);
+            --radius: 16px;
+            --radius-sm: 10px;
+            --radius-lg: 24px;
+            --radius-full: 50%;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        .app { display: flex; height: 100vh; }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 16px;
+            transition: width 0.3s ease;
+            overflow: hidden;
+            border-right: none;
+            position: relative;
+            z-index: 10;
+        }
+
+        .sidebar.collapsed { width: 72px; }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 12px;
+            margin-bottom: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--neu-pressed);
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--accent);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 20px;
+            flex-shrink: 0;
+            box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+        }
+
+        .sidebar-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            white-space: nowrap;
+            opacity: 0.7;
+        }
+
+        .sidebar.collapsed .sidebar-title { display: none; }
+
+        .sidebar-nav { flex: 1; overflow-y: auto; padding: 8px 0; }
+        .sidebar-nav::-webkit-scrollbar { display: none; }
+
+        .nav-section { margin-bottom: 16px; }
+
+        .nav-section-title {
+            padding: 6px 16px 8px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .nav-item {
+            padding: 10px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            margin: 3px 4px;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            box-shadow: var(--neu-flat);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            box-shadow: var(--neu-pressed);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+        .nav-label { white-space: nowrap; }
+        .sidebar.collapsed .nav-label { display: none; }
+        .sidebar.collapsed .nav-section-title { display: none; }
+
+        .sidebar-footer {
+            padding: 12px;
+            border-radius: var(--radius);
+            box-shadow: var(--neu-pressed);
+            margin-top: 12px;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-full);
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+        }
+
+        .user-info { white-space: nowrap; }
+        .user-name { font-size: 13px; font-weight: 600; color: var(--text-primary); opacity: 0.7; }
+        .user-role { font-size: 11px; color: var(--text-muted); }
+        .sidebar.collapsed .user-info { display: none; }
+
+        /* Main Content */
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+        .topbar {
+            height: 64px;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            gap: 16px;
+        }
+
+        .topbar-left { display: flex; align-items: center; gap: 16px; }
+
+        .toggle-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: var(--bg);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--neu-flat);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.15s ease;
+        }
+
+        .toggle-btn:hover { box-shadow: var(--neu-pressed); }
+        .toggle-btn:active { box-shadow: var(--neu-pressed); }
+
+        .breadcrumb { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+        .breadcrumb span { color: var(--text-primary); font-weight: 600; opacity: 0.7; }
+
+        .topbar-right { display: flex; align-items: center; gap: 12px; }
+
+        .topbar-btn {
+            width: 42px;
+            height: 42px;
+            border: none;
+            background: var(--bg);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--neu-flat);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            transition: all 0.15s ease;
+            position: relative;
+        }
+
+        .topbar-btn:hover { box-shadow: var(--neu-pressed); color: var(--accent); }
+        .topbar-btn:active { box-shadow: var(--neu-pressed); }
+
+        .badge {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 18px;
+            height: 18px;
+            background: var(--danger);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 2px 2px 4px rgba(252,129,129,0.4);
+        }
+
+        .btn-create {
+            padding: 10px 20px;
+            border: none;
+            background: var(--bg);
+            cursor: pointer;
+            border-radius: var(--radius);
+            box-shadow: var(--neu-flat);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-create:hover { box-shadow: var(--neu-pressed); }
+        .btn-create:active { box-shadow: var(--neu-pressed); }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: var(--bg);
+        }
+
+        .content::-webkit-scrollbar { width: 8px; }
+        .content::-webkit-scrollbar-track { background: var(--bg); }
+        .content::-webkit-scrollbar-thumb {
+            background: var(--shadow-dark);
+            border-radius: 4px;
+        }
+
+        /* Page Header */
+        .page-header {
+            margin-bottom: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .page-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text-primary);
+            opacity: 0.6;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        /* Neu Components */
+        .neu-card {
+            background: var(--bg);
+            border-radius: var(--radius);
+            box-shadow: var(--neu-flat);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .neu-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .neu-card-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-primary);
+            opacity: 0.5;
+        }
+
+        .neu-btn {
+            padding: 10px 20px;
+            border: none;
+            background: var(--bg);
+            cursor: pointer;
+            border-radius: var(--radius);
+            box-shadow: var(--neu-flat);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+        }
+
+        .neu-btn:hover { box-shadow: var(--neu-pressed); }
+        .neu-btn:active { box-shadow: var(--neu-pressed); }
+        .neu-btn.accent { color: var(--accent); }
+        .neu-btn.success { color: var(--success); }
+        .neu-btn.danger { color: var(--danger); }
+        .neu-btn.pressed { box-shadow: var(--neu-pressed); }
+
+        .neu-btn-sm {
+            padding: 8px 14px;
+            font-size: 12px;
+            border-radius: var(--radius-sm);
+        }
+
+        .neu-btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--neu-flat);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover { box-shadow: var(--neu-convex); }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--neu-pressed);
+            flex-shrink: 0;
+        }
+
+        .stat-icon.blue { color: var(--info); }
+        .stat-icon.green { color: var(--success); }
+        .stat-icon.yellow { color: var(--warning); }
+        .stat-icon.purple { color: var(--accent); }
+        .stat-icon.red { color: var(--danger); }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-primary);
+            opacity: 0.5;
+            line-height: 1;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-top: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* AI Badge */
+        .ai-badge {
+            background: var(--bg);
+            box-shadow: var(--neu-pressed);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--accent);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Board / Kanban */
+        .board {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            min-height: 500px;
+        }
+
+        .board::-webkit-scrollbar { height: 8px; }
+        .board::-webkit-scrollbar-track { background: var(--bg); border-radius: 4px; }
+        .board::-webkit-scrollbar-thumb { background: var(--shadow-dark); border-radius: 4px; }
+
+        .column {
+            min-width: 290px;
+            max-width: 320px;
+            flex-shrink: 0;
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 16px;
+            box-shadow: var(--neu-pressed);
+        }
+
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding: 4px;
+        }
+
+        .column-title {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-primary);
+            opacity: 0.5;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .column-count {
+            background: var(--bg);
+            box-shadow: var(--neu-pressed);
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .column-drag-area {
+            min-height: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .issue-card {
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            box-shadow: var(--neu-flat);
+            cursor: grab;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .issue-card:hover { box-shadow: var(--neu-convex); }
+        .issue-card:active { box-shadow: var(--neu-pressed); cursor: grabbing; }
+        .issue-card.dragging { opacity: 0.4; transform: rotate(3deg) scale(0.95); }
+
+        .issue-id {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .issue-title {
+            font-size: 14px;
+            margin: 6px 0;
+            font-weight: 600;
+            color: var(--text-primary);
+            opacity: 0.6;
+        }
+
+        .issue-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .issue-assignee {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .issue-avatar {
+            width: 26px;
+            height: 26px;
+            border-radius: var(--radius-full);
+            background: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            box-shadow: 2px 2px 4px var(--shadow-dark), -2px -2px 4px var(--shadow-light);
+        }
+
+        .issue-priority {
+            padding: 3px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            box-shadow: var(--neu-pressed);
+        }
+
+        .priority-high { color: var(--danger); }
+        .priority-medium { color: var(--warning); }
+        .priority-low { color: var(--info); }
+
+        .issue-type-badge {
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .issue-points {
+            font-size: 11px;
+            background: var(--bg);
+            box-shadow: var(--neu-pressed);
+            padding: 2px 8px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            height: 12px;
+            background: var(--bg);
+            border-radius: 6px;
+            box-shadow: var(--neu-pressed);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+
+        /* Sprint Header */
+        .sprint-header {
+            background: var(--bg);
+            box-shadow: var(--neu-flat);
+            padding: 20px 24px;
+            border-radius: var(--radius);
+            margin-bottom: 24px;
+        }
+
+        .sprint-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            opacity: 0.6;
+            margin-bottom: 6px;
+        }
+
+        .sprint-header .sprint-dates {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+        }
+
+        /* Backlog */
+        .backlog-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--neu-flat);
+            cursor: grab;
+            transition: all 0.2s ease;
+            margin-bottom: 8px;
+        }
+
+        .backlog-item:hover { box-shadow: var(--neu-convex); }
+        .backlog-item:active { box-shadow: var(--neu-pressed); }
+
+        .drag-handle {
+            color: var(--text-muted);
+            cursor: grab;
+            font-size: 16px;
+            user-select: none;
+        }
+
+        .list-header {
+            display: grid;
+            grid-template-columns: 40px 1fr 120px 90px 70px 50px;
+            padding: 10px 16px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        /* Charts */
+        .chart-container {
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--neu-pressed);
+            padding: 20px;
+            height: 280px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            padding-bottom: 36px;
+        }
+
+        .chart-bar-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-bar {
+            width: 32px;
+            background: linear-gradient(180deg, var(--accent-light), var(--accent));
+            border-radius: 8px 8px 0 0;
+            transition: height 0.6s ease;
+            position: relative;
+            box-shadow: 2px 0 4px rgba(102,126,234,0.2);
+        }
+
+        .chart-bar:hover { opacity: 0.8; }
+
+        .chart-bar::after {
+            content: attr(data-value);
+            position: absolute;
+            top: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .chart-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Timeline */
+        .timeline { padding: 16px 0; }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(163,177,198,0.2);
+        }
+
+        .timeline-date {
+            width: 110px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .timeline-content {
+            flex: 1;
+            padding-left: 24px;
+            position: relative;
+        }
+
+        .timeline-dot {
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: var(--radius-full);
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: 0 0 0 4px var(--bg), 0 0 0 5px var(--shadow-dark);
+        }
+
+        .timeline-dot.completed { background: var(--success); }
+        .timeline-dot.planned { background: var(--shadow-dark); }
+
+        /* Chat */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 580px;
+            background: var(--bg);
+            border-radius: var(--radius);
+            box-shadow: var(--neu-flat);
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .chat-messages::-webkit-scrollbar { width: 6px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: var(--shadow-dark); border-radius: 3px; }
+
+        .chat-message { display: flex; gap: 10px; }
+
+        .chat-bubble {
+            background: var(--bg);
+            box-shadow: var(--neu-flat);
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            max-width: 70%;
+            font-size: 13px;
+            color: var(--text-primary);
+            opacity: 0.7;
+        }
+
+        .chat-bubble.self {
+            box-shadow: var(--neu-pressed);
+            margin-left: auto;
+            color: var(--accent);
+            opacity: 1;
+        }
+
+        .chat-bubble.ai-bubble {
+            box-shadow: var(--neu-concave);
+            border-left: 3px solid var(--accent);
+        }
+
+        .chat-sender {
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--text-muted);
+        }
+
+        .chat-bubble.self .chat-sender { color: var(--accent); }
+        .chat-bubble.ai-bubble .chat-sender { color: var(--accent); }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+            padding: 16px;
+            background: var(--bg);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            background: var(--bg);
+            border-radius: var(--radius);
+            box-shadow: var(--neu-pressed);
+            font-size: 14px;
+            color: var(--text-primary);
+            font-family: inherit;
+            outline: none;
+        }
+
+        .chat-input::placeholder { color: var(--text-muted); }
+
+        /* Forms */
+        .form-group { margin-bottom: 18px; }
+
+        .form-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--neu-pressed);
+            font-size: 14px;
+            color: var(--text-primary);
+            font-family: inherit;
+            outline: none;
+            transition: box-shadow 0.2s;
+        }
+
+        .form-input:focus, .form-textarea:focus {
+            box-shadow: var(--neu-pressed), 0 0 0 2px var(--accent);
+        }
+
+        .form-select {
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23718096' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+        }
+
+        .form-textarea { min-height: 100px; resize: vertical; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(224,229,236,0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+        .modal {
+            background: var(--bg);
+            border-radius: var(--radius-lg);
+            width: 90%;
+            max-width: 750px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 12px 12px 24px var(--shadow-dark), -12px -12px 24px var(--shadow-light);
+            transform: translateY(30px) scale(0.95);
+            transition: transform 0.3s ease;
+        }
+
+        .modal-overlay.active .modal { transform: translateY(0) scale(1); }
+
+        .modal::-webkit-scrollbar { width: 6px; }
+        .modal::-webkit-scrollbar-thumb { background: var(--shadow-dark); border-radius: 3px; }
+
+        .modal-header {
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: none;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-primary);
+            opacity: 0.6;
+        }
+
+        .modal-body { padding: 0 24px 24px; }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+            background: var(--bg);
+            border-radius: var(--radius);
+            box-shadow: var(--neu-pressed);
+            padding: 6px;
+        }
+
+        .tab {
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.2s ease;
+        }
+
+        .tab:hover { color: var(--text-primary); }
+        .tab.active {
+            box-shadow: var(--neu-flat);
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* Alerts / Insights */
+        .insight-card {
+            padding: 14px 16px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--neu-pressed);
+            margin-bottom: 10px;
+        }
+
+        .insight-card.warning { border-left: 4px solid var(--warning); }
+        .insight-card.success { border-left: 4px solid var(--success); }
+        .insight-card.info { border-left: 4px solid var(--info); }
+        .insight-card.danger { border-left: 4px solid var(--danger); }
+        .insight-card.accent { border-left: 4px solid var(--accent); }
+
+        .insight-title {
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .insight-card.warning .insight-title { color: var(--warning); }
+        .insight-card.success .insight-title { color: var(--success); }
+        .insight-card.info .insight-title { color: var(--info); }
+        .insight-card.danger .insight-title { color: var(--danger); }
+        .insight-card.accent .insight-title { color: var(--accent); }
+
+        .insight-text { font-size: 13px; color: var(--text-secondary); }
+
+        /* Automation */
+        .automation-step {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 18px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--neu-flat);
+            border-left: 4px solid var(--accent);
+            transition: all 0.2s ease;
+        }
+
+        .automation-step:hover { box-shadow: var(--neu-convex); }
+
+        .automation-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: var(--neu-pressed);
+            flex-shrink: 0;
+        }
+
+        .automation-arrow {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 22px;
+            padding: 4px 0;
+        }
+
+        /* Templates */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+        }
+
+        .template-card {
+            background: var(--bg);
+            border-radius: var(--radius);
+            box-shadow: var(--neu-flat);
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .template-card:hover { box-shadow: var(--neu-convex); transform: translateY(-3px); }
+        .template-card:active { box-shadow: var(--neu-pressed); }
+
+        .template-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--neu-pressed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 16px;
+        }
+
+        .template-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            opacity: 0.6;
+            margin-bottom: 6px;
+        }
+
+        .template-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Roadmap */
+        .roadmap-bar {
+            height: 36px;
+            background: var(--bg);
+            border-radius: 18px;
+            box-shadow: var(--neu-pressed);
+            margin-bottom: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .roadmap-fill {
+            height: 100%;
+            background: linear-gradient(135deg, var(--accent), var(--accent-light));
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            font-size: 12px;
+            font-weight: 700;
+            color: white;
+            border-radius: 18px;
+            transition: width 0.5s ease;
+        }
+
+        /* Report Grid */
+        .report-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Workload bars */
+        .workload-bar {
+            height: 8px;
+            background: var(--bg);
+            border-radius: 4px;
+            box-shadow: var(--neu-pressed);
+            overflow: hidden;
+        }
+
+        .workload-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background: var(--bg);
+            border-radius: 12px;
+            box-shadow: var(--neu-pressed);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: var(--shadow-dark);
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .toggle-switch.active::after {
+            left: 23px;
+            background: var(--accent);
+        }
+
+        /* Animations */
+        .fade-in { animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hidden { display: none !important; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -260px;
+                top: 0;
+                bottom: 0;
+                z-index: 100;
+                box-shadow: 8px 0 16px var(--shadow-dark);
+            }
+            .sidebar.mobile-open { left: 0; }
+            .report-grid { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .board { flex-direction: column; overflow-x: visible; }
+            .column { min-width: 100%; max-width: 100%; }
+        }
+
+        /* Checkbox neu style */
+        .neu-checkbox {
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            background: var(--bg);
+            box-shadow: var(--neu-pressed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .neu-checkbox.checked {
+            box-shadow: var(--neu-flat);
+        }
+
+        .neu-checkbox.checked::after {
+            content: '✓';
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 800;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            opacity: 0.4;
+        }
+    </style>
+</head>
+<body>
+<div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">F</div>
+            <div class="sidebar-title">FlowTrack Pro</div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-title">Main</div>
+                <div class="nav-item active" data-view="dashboard" onclick="navigate('dashboard')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+                    <span class="nav-label">Dashboard</span>
+                </div>
+                <div class="nav-item" data-view="backlog" onclick="navigate('backlog')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                    <span class="nav-label">Backlog</span>
+                </div>
+                <div class="nav-item" data-view="board" onclick="navigate('board')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="5" height="18" rx="2"/><rect x="10" y="3" width="5" height="18" rx="2"/><rect x="17" y="3" width="5" height="18" rx="2"/></svg>
+                    <span class="nav-label">Sprint Board</span>
+                </div>
+                <div class="nav-item" data-view="roadmap" onclick="navigate('roadmap')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V4"/><path d="M4 12l8-8 8 8"/></svg>
+                    <span class="nav-label">Roadmap</span>
+                </div>
+                <div class="nav-item" data-view="reports" onclick="navigate('reports')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                    <span class="nav-label">Reports</span>
+                </div>
+                <div class="nav-item" data-view="time" onclick="navigate('time')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span class="nav-label">Time Tracking</span>
+                </div>
+            </div>
+            <div class="nav-section">
+                <div class="nav-section-title">Workspace</div>
+                <div class="nav-item" data-view="chat" onclick="navigate('chat')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                    <span class="nav-label">Team Chat</span>
+                </div>
+                <div class="nav-item" data-view="automations" onclick="navigate('automations')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg>
+                    <span class="nav-label">Automations</span>
+                </div>
+                <div class="nav-item" data-view="templates" onclick="navigate('templates')">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <span class="nav-label">Templates</span>
+                </div>
+            </div>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="avatar">JD</div>
+                <div class="user-info">
+                    <div class="user-name">John Doe</div>
+                    <div class="user-role">Project Lead</div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="main">
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="toggle-btn" onclick="toggleSidebar()" aria-label="Toggle sidebar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                </button>
+                <div class="breadcrumb" id="breadcrumb">Home / <span>Dashboard</span></div>
+            </div>
+            <div class="topbar-right">
+                <button class="topbar-btn" onclick="showAIAssistant()" aria-label="AI Assistant">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 14a1 1 0 1 1 1-1 1 1 0 0 1-1 1zm1-4.5a1 1 0 0 1-2 0V8a1 1 0 0 1 2 0z"/></svg>
+                    <span class="badge">1</span>
+                </button>
+                <button class="topbar-btn" onclick="showNotifications()" aria-label="Notifications">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                </button>
+                <button class="btn-create" onclick="openModal('createIssueModal')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Create Issue
+                </button>
+            </div>
+        </header>
+        <div class="content" id="content"></div>
+    </div>
+</div>
+
+<!-- Create Issue Modal -->
+<div class="modal-overlay" id="createIssueModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Create New Issue</h3>
+            <button class="neu-btn-icon" onclick="closeModal('createIssueModal')" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Title</label>
+                <input type="text" class="form-input" id="issueTitle" placeholder="What needs to be done?">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea class="form-textarea" id="issueDesc" placeholder="Add a detailed description..."></textarea>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" id="issueType">
+                        <option value="story">📖 Story</option>
+                        <option value="task">✓ Task</option>
+                        <option value="bug">🐛 Bug</option>
+                        <option value="epic">💎 Epic</option>
+                        <option value="subtask">↳ Subtask</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Priority</label>
+                    <select class="form-select" id="issuePriority">
+                        <option value="high">High</option>
+                        <option value="medium">Medium</option>
+                        <option value="low">Low</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Assignee</label>
+                    <select class="form-select" id="issueAssignee">
+                        <option value="JD">John Doe</option>
+                        <option value="AS">Alice Smith</option>
+                        <option value="BJ">Bob Johnson</option>
+                        <option value="MK">Mike Kim</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Sprint</label>
+                    <select class="form-select" id="issueSprint">
+                        <option value="current">Sprint 24 (Current)</option>
+                        <option value="backlog">Backlog</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Estimate (Story Points)</label>
+                <input type="number" class="form-input" id="issueEstimate" placeholder="e.g., 5" min="0" max="100">
+            </div>
+            <div style="display:flex;justify-content:flex-end;gap:12px;margin-top:24px">
+                <button class="neu-btn" onclick="closeModal('createIssueModal')">Cancel</button>
+                <button class="neu-btn accent" onclick="createIssue()">Create Issue</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Issue Detail Modal -->
+<div class="modal-overlay" id="issueDetailModal">
+    <div class="modal" style="max-width:850px">
+        <div class="modal-header">
+            <h3 class="modal-title" id="detailTitle">FT-001: Issue Title</h3>
+            <button class="neu-btn-icon" onclick="closeModal('issueDetailModal')" aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="tabs" id="detailTabs">
+                <div class="tab active" data-tab="details" onclick="switchDetailTab('details', this)">Details</div>
+                <div class="tab" data-tab="comments" onclick="switchDetailTab('comments', this)">Comments</div>
+                <div class="tab" data-tab="history" onclick="switchDetailTab('history', this)">History</div>
+                <div class="tab" data-tab="ai" onclick="switchDetailTab('ai', this)">AI Insights</div>
+            </div>
+            <div id="detailContent"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// State Management
+const appState = {
+    currentView: 'dashboard',
+    issues: [],
+    sprints: [
+        { id: 'current', name: 'Sprint 24', startDate: '2024-01-15', endDate: '2024-01-29', goal: 'Complete authentication module' },
+        { id: 'next', name: 'Sprint 25', startDate: '2024-01-29', endDate: '2024-02-12', goal: 'Dashboard UI implementation' }
+    ],
+    columns: ['todo', 'inprogress', 'inreview', 'done'],
+    columnNames: { todo: 'To Do', inprogress: 'In Progress', inreview: 'In Review', done: 'Done' },
+    users: { JD: 'John Doe', AS: 'Alice Smith', BJ: 'Bob Johnson', MK: 'Mike Kim' },
+    userInitials: { JD: 'JD', AS: 'AS', BJ: 'BJ', MK: 'MK' },
+    messages: [],
+    timeLogs: [],
+    nextId: 1,
+    automationRules: [
+        { id: 1, name: 'Auto-assign bugs to QA team', desc: 'Trigger: Issue created with type=bug → Action: Assign to QA group', enabled: true, icon: '⚡', color: 'var(--accent)' },
+        { id: 2, name: 'Move to Review when PR merged', desc: 'Trigger: GitHub PR merged → Action: Update status to In Review', enabled: true, icon: '🔄', color: 'var(--success)' },
+        { id: 3, name: 'Sprint planning reminder', desc: 'Trigger: 2 days before sprint end → Action: Notify team in chat', enabled: true, icon: '📅', color: 'var(--warning)' }
+    ]
+};
+
+// Initialize
+function initApp() {
+    const saved = localStorage.getItem('flowtrack_neu_issues');
+    if (saved) {
+        try {
+            appState.issues = JSON.parse(saved);
+            appState.nextId = appState.issues.length > 0 ? Math.max(...appState.issues.map(function(i) { return i.id; })) + 1 : 1;
+        } catch(e) {
+            loadDefaultIssues();
+        }
+    } else {
+        loadDefaultIssues();
+    }
+
+    appState.messages = [
+        { id: 1, user: 'AS', text: 'Hey team, I just pushed the login page fixes. Can someone review?', time: '10:30 AM' },
+        { id: 2, user: 'JD', text: "Sure, I'll take a look in the next hour.", time: '10:32 AM' },
+        { id: 3, user: 'BJ', text: 'Great progress everyone! Sprint goal is 65% complete.', time: '10:45 AM' },
+        { id: 4, user: 'AI', text: '🤖 AI Alert: I detected 3 potential bottlenecks in the current sprint. Check AI Insights for details.', time: '10:50 AM' }
+    ];
+
+    navigate('dashboard');
+}
+
+function loadDefaultIssues() {
+    appState.issues = [
+        { id: 1, title: 'Implement JWT Authentication', desc: 'Add JWT token-based auth with refresh tokens and secure cookie storage.', type: 'story', priority: 'high', assignee: 'JD', status: 'todo', sprint: 'current', estimate: 8, created: '2024-01-15', comments: [] },
+        { id: 2, title: 'Fix Login Page Layout', desc: 'Responsive design issues on mobile devices - elements overlapping.', type: 'bug', priority: 'medium', assignee: 'AS', status: 'inprogress', sprint: 'current', estimate: 3, created: '2024-01-16', comments: [] },
+        { id: 3, title: 'Setup CI/CD Pipeline', desc: 'Configure GitHub Actions for automated testing and deployment.', type: 'task', priority: 'high', assignee: 'BJ', status: 'inprogress', sprint: 'current', estimate: 5, created: '2024-01-15', comments: [] },
+        { id: 4, title: 'Database Schema Optimization', desc: 'Optimize queries for user dashboard loading performance.', type: 'task', priority: 'low', assignee: 'MK', status: 'todo', sprint: 'current', estimate: 5, created: '2024-01-17', comments: [] },
+        { id: 5, title: 'User Profile Page', desc: 'Design and implement user profile page with avatar upload functionality.', type: 'story', priority: 'medium', assignee: 'AS', status: 'inreview', sprint: 'current', estimate: 8, created: '2024-01-14', comments: [] },
+        { id: 6, title: 'Fix Password Reset Email', desc: 'Email template not rendering correctly in Gmail.', type: 'bug', priority: 'high', assignee: 'JD', status: 'done', sprint: 'current', estimate: 2, created: '2024-01-13', comments: [] },
+        { id: 7, title: 'Implement Kanban Board', desc: 'Drag and drop functionality for issue management with real-time updates.', type: 'epic', priority: 'high', assignee: 'BJ', status: 'todo', sprint: 'current', estimate: 13, created: '2024-01-15', comments: [] },
+        { id: 8, title: 'Write Unit Tests', desc: 'Increase test coverage for auth module to 80%.', type: 'subtask', priority: 'medium', assignee: 'MK', status: 'todo', sprint: 'current', estimate: 3, created: '2024-01-16', comments: [] },
+        { id: 9, title: 'API Rate Limiting', desc: 'Implement rate limiting middleware for all API endpoints.', type: 'task', priority: 'medium', assignee: 'JD', status: 'backlog', sprint: 'backlog', estimate: 5, created: '2024-01-18', comments: [] },
+        { id: 10, title: 'Dark Mode Support', desc: 'Add dark mode theme toggle with system preference detection.', type: 'story', priority: 'low', assignee: 'AS', status: 'backlog', sprint: 'backlog', estimate: 8, created: '2024-01-18', comments: [] }
+    ];
+    saveData();
+}
+
+function saveData() {
+    localStorage.setItem('flowtrack_neu_issues', JSON.stringify(appState.issues));
+}
+
+// Navigation
+function navigate(view) {
+    appState.currentView = view;
+    document.querySelectorAll('.nav-item').forEach(function(el) {
+        el.classList.remove('active');
+        if (el.getAttribute('data-view') === view) el.classList.add('active');
+    });
+    renderContent();
+}
+
+function toggleSidebar() {
+    var sb = document.getElementById('sidebar');
+    if (window.innerWidth <= 768) {
+        sb.classList.toggle('mobile-open');
+    } else {
+        sb.classList.toggle('collapsed');
+    }
+}
+
+// Render Content Router
+function renderContent() {
+    var content = document.getElementById('content');
+    var breadcrumb = document.getElementById('breadcrumb');
+    var titles = {
+        dashboard: 'Dashboard', backlog: 'Backlog', board: 'Sprint Board',
+        roadmap: 'Roadmap', reports: 'Reports', time: 'Time Tracking',
+        chat: 'Team Chat', automations: 'Automations', templates: 'Templates'
+    };
+    breadcrumb.innerHTML = 'Home / <span>' + titles[appState.currentView] + '</span>';
+
+    switch(appState.currentView) {
+        case 'dashboard': renderDashboard(content); break;
+        case 'backlog': renderBacklog(content); break;
+        case 'board': renderBoard(content); break;
+        case 'roadmap': renderRoadmap(content); break;
+        case 'reports': renderReports(content); break;
+        case 'time': renderTimeTracking(content); break;
+        case 'chat': renderChat(content); break;
+        case 'automations': renderAutomations(content); break;
+        case 'templates': renderTemplates(content); break;
+    }
+}
+
+// Dashboard
+function renderDashboard(container) {
+    var sprintIssues = appState.issues.filter(function(i) { return i.sprint === 'current'; });
+    var total = sprintIssues.length;
+    var done = sprintIssues.filter(function(i) { return i.status === 'done'; }).length;
+    var inProgress = sprintIssues.filter(function(i) { return i.status === 'inprogress'; }).length;
+    var highPriority = sprintIssues.filter(function(i) { return i.priority === 'high' && i.status !== 'done'; }).length;
+    var progress = total ? Math.round((done / total) * 100) : 0;
+    var totalPoints = sprintIssues.reduce(function(s, i) { return s + (i.estimate || 0); }, 0);
+    var donePoints = sprintIssues.filter(function(i) { return i.status === 'done'; }).reduce(function(s, i) { return s + (i.estimate || 0); }, 0);
+
+    var velocityData = [18, 22, 20, 25, 23, 21];
+    var maxVel = Math.max.apply(null, velocityData);
+
+    container.innerHTML =
+        '<div class="page-header">' +
+            '<div>' +
+                '<h1 class="page-title">Dashboard</h1>' +
+                '<p class="page-subtitle">Welcome back, John! Here\'s your project overview.</p>' +
+            '</div>' +
+            '<div style="display:flex;gap:10px;align-items:center">' +
+                '<span class="ai-badge">✨ AI Ready</span>' +
+                '<button class="neu-btn" onclick="navigate(\'board\')">View Sprint</button>' +
+            '</div>' +
+        '</div>' +
+        '<div class="stats-grid fade-in">' +
+            '<div class="stat-card">' +
+                '<div class="stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><rect x="15" y="15" width="6" height="6" rx="1"/></svg></div>' +
+                '<div><div class="stat-value">' + total + '</div><div class="stat-label">Total Issues</div></div>' +
+            '</div>' +
+            '<div class="stat-card">' +
+                '<div class="stat-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>' +
+                '<div><div class="stat-value">' + done + '</div><div class="stat-label">Completed</div></div>' +
+            '</div>' +
+            '<div class="stat-card">' +
+                '<div class="stat-icon yellow"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>' +
+                '<div><div class="stat-value">' + inProgress + '</div><div class="stat-label">In Progress</div></div>' +
+            '</div>' +
+            '<div class="stat-card">' +
+                '<div class="stat-icon red"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>' +
+                '<div><div class="stat-value">' + highPriority + '</div><div class="stat-label">High Priority</div></div>' +
+            '</div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:2fr 1fr;gap:20px" class="fade-in">' +
+            '<div class="neu-card">' +
+                '<div class="neu-card-header">' +
+                    '<h3 class="neu-card-title">Sprint Progress</h3>' +
+                    '<span class="ai-badge">' + progress + '% Complete</span>' +
+                '</div>' +
+                '<div style="margin-bottom:20px">' +
+                    '<div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div>' +
+                    '<div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px;color:var(--text-muted)">' +
+                        '<span>' + done + ' of ' + total + ' issues completed</span>' +
+                        '<span>Ends: ' + appState.sprints[0].endDate + '</span>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="neu-card-title" style="margin-bottom:14px">Velocity Trend</div>' +
+                '<div class="chart-container">' +
+                    velocityData.map(function(v, idx) {
+                        var h = (v / maxVel) * 180;
+                        return '<div class="chart-bar-group"><div class="chart-bar" style="height:' + h + 'px" data-value="' + v + '"></div><div class="chart-label">W' + (idx + 1) + '</div></div>';
+                    }).join('') +
+                '</div>' +
+            '</div>' +
+            '<div class="neu-card">' +
+                '<div class="neu-card-header"><h3 class="neu-card-title">AI Insights</h3></div>' +
+                '<div class="insight-card warning">' +
+                    '<div class="insight-title">⚠️ Risk Prediction</div>' +
+                    '<div class="insight-text">2 issues at risk of missing sprint deadline based on historical velocity.</div>' +
+                '</div>' +
+                '<div class="insight-card success">' +
+                    '<div class="insight-title">✅ Opportunity</div>' +
+                    '<div class="insight-text">Team capacity shows 15% availability for additional tasks.</div>' +
+                '</div>' +
+                '<div class="insight-card info">' +
+                    '<div class="insight-title">💡 Suggestion</div>' +
+                    '<div class="insight-text">Consider splitting Epic FT-007 into smaller tasks for better tracking.</div>' +
+                '</div>' +
+                '<button class="neu-btn" style="width:100%;margin-top:12px" onclick="navigate(\'reports\')">View Full Report</button>' +
+            '</div>' +
+        '</div>' +
+        '<div class="neu-card fade-in">' +
+            '<div class="neu-card-header"><h3 class="neu-card-title">Recent Activity</h3></div>' +
+            '<div class="timeline">' +
+                appState.issues.slice(-4).reverse().map(function(issue) {
+                    return '<div class="timeline-item">' +
+                        '<div class="timeline-date">' + issue.created + '</div>' +
+                        '<div class="timeline-content">' +
+                            '<div class="timeline-dot"></div>' +
+                            '<div style="font-size:13px;opacity:0.6">' + issue.assignee + ' updated <strong>' + issue.title + '</strong> to ' + issue.status + '</div>' +
+                        '</div>' +
+                    '</div>';
+                }).join('') +
+            '</div>' +
+        '</div>';
+}
+
+// Backlog
+function renderBacklog(container) {
+    var allIssues = appState.issues.filter(function(i) { return i.status !== 'done'; }).sort(function(a, b) {
+        var pScore = { high: 3, medium: 2, low: 1 };
+        return (pScore[b.priority] || 0) - (pScore[a.priority] || 0);
+    });
+
+    var sprintIssues = appState.issues.filter(function(i) { return i.sprint === 'current'; });
+    var total = sprintIssues.length;
+    var done = sprintIssues.filter(function(i) { return i.status === 'done'; }).length;
+    var progress = total ? Math.round((done / total) * 100) : 0;
+
+    container.innerHTML =
+        '<div class="page-header">' +
+            '<div><h1 class="page-title">Backlog</h1><p class="page-subtitle">Prioritize and manage your upcoming work</p></div>' +
+            '<div style="display:flex;gap:10px">' +
+                '<button class="neu-btn accent" onclick="aiPrioritize()">✨ AI Prioritize</button>' +
+                '<button class="neu-btn accent" onclick="openModal(\'createIssueModal\')">+ Create Issue</button>' +
+            '</div>' +
+        '</div>' +
+        '<div class="sprint-header fade-in">' +
+            '<h3>' + appState.sprints[0].name + ': ' + appState.sprints[0].goal + '</h3>' +
+            '<div class="sprint-dates">' + appState.sprints[0].startDate + ' — ' + appState.sprints[0].endDate + '</div>' +
+            '<div class="progress-bar"><div class="progress-fill" style="width:' + progress + '%"></div></div>' +
+        '</div>' +
+        '<div class="neu-card fade-in">' +
+            '<div class="list-header">' +
+                '<div>Type</div><div>Title</div><div>Assignee</div><div>Priority</div><div>Points</div><div></div>' +
+            '</div>' +
+            '<div id="backlogList">' +
+                allIssues.map(function(issue) {
+                    return '<div class="backlog-item" draggable="true" ondragstart="dragStart(event)" data-id="' + issue.id + '">' +
+                        '<div class="drag-handle">⋮⋮</div>' +
+                        '<span style="font-size:16px">' + getTypeIcon(issue.type) + '</span>' +
+                        '<span style="flex:1;font-size:13px;font-weight:600;opacity:0.6;cursor:pointer" onclick="openIssueDetail(' + issue.id + ')">' + issue.title + '</span>' +
+                        '<div class="issue-assignee">' +
+                            '<div class="issue-avatar">' + appState.userInitials[issue.assignee] + '</div>' +
+                            '<span style="font-size:11px;opacity:0.5">' + (appState.users[issue.assignee] || issue.assignee) + '</span>' +
+                        '</div>' +
+                        '<span class="issue-priority priority-' + issue.priority + '">' + issue.priority + '</span>' +
+                        '<span style="font-size:12px;opacity:0.4">' + (issue.estimate || '-') + '</span>' +
+                        '<button class="neu-btn-icon" style="width:28px;height:28px" onclick="openIssueDetail(' + issue.id + ')">' +
+                            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>' +
+                        '</button>' +
+                    '</div>';
+                }).join('') +
+            '</div>' +
+        '</div>';
+}
+
+function getTypeIcon(type) {
+    var icons = { story: '📖', task: '✓', bug: '🐛', epic: '💎', subtask: '↳' };
+    return icons[type] || '✓';
+}
+
+function dragStart(ev) {
+    ev.dataTransfer.setData('text/plain', ev.target.closest('[data-id]').getAttribute('data-id'));
+    ev.target.closest('.backlog-item, .issue-card').classList.add('dragging');
+}
+
+function allowDrop(ev) { ev.preventDefault(); }
+
+function dropToColumn(ev, col) {
+    ev.preventDefault();
+    var id = parseInt(ev.dataTransfer.getData('text/plain'));
+    var issue = appState.issues.find(function(i) { return i.id === id; });
+    if (issue && issue.status !== col) {
+        issue.status = col;
+        if (col === 'done') {
+            appState.timeLogs.push({ issueId: id, hours: Math.ceil(Math.random() * 4 + 1), date: new Date().toISOString() });
+        }
+        saveData();
+        renderContent();
+    }
+}
+
+// Board
+function renderBoard(container) {
+    var columnsHtml = appState.columns.map(function(col) {
+        var issues = appState.issues.filter(function(i) { return i.status === col && i.sprint === 'current'; });
+        var totalPoints = issues.reduce(function(s, i) { return s + (i.estimate || 0); }, 0);
+        return '<div class="column" ondragover="allowDrop(event)" ondrop="dropToColumn(event, \'' + col + '\')">' +
+            '<div class="column-header">' +
+                '<div class="column-title">' + appState.columnNames[col] + ' <span class="column-count">' + issues.length + ' | ' + totalPoints + 'pts</span></div>' +
+                '<button class="neu-btn-icon" style="width:28px;height:28px" onclick="openModal(\'createIssueModal\')">+</button>' +
+            '</div>' +
+            '<div class="column-drag-area">' +
+                issues.map(function(issue) {
+                    return '<div class="issue-card" draggable="true" ondragstart="dragStart(event)" data-id="' + issue.id + '" onclick="openIssueDetail(' + issue.id + ')">' +
+                        '<div class="issue-id">FT-' + String(issue.id).padStart(3, '0') + '</div>' +
+                        '<div class="issue-title">' + issue.title + '</div>' +
+                        '<div class="issue-meta">' +
+                            '<div class="issue-assignee"><div class="issue-avatar">' + appState.userInitials[issue.assignee] + '</div></div>' +
+                            '<div style="display:flex;gap:6px;align-items:center">' +
+                                '<span class="issue-priority priority-' + issue.priority + '">' + issue.priority + '</span>' +
+                                (issue.estimate ? '<span class="issue-points">' + issue.estimate + 'pts</span>' : '') +
+                            '</div>' +
+                        '</div>' +
+                        '<div style="font-size:11px;opacity:0.4;margin-top:6px">' + getTypeIcon(issue.type) + ' ' + issue.type + '</div>' +
+                    '</div>';
+                }).join('') +
+                (issues.length === 0 ? '<div class="empty-state"><div class="empty-state-icon">📋</div><div style="font-size:12px">Drop issues here</div></div>' : '') +
+            '</div>' +
+        '</div>';
+    }).join('');
+
+    container.innerHTML =
+        '<div class="page-header">' +
+            '<div><h1 class="page-title">Sprint Board</h1><p class="page-subtitle">' + appState.sprints[0].name + ' • ' + appState.sprints[0].startDate + ' to ' + appState.sprints[0].endDate + '</p></div>' +
+            '<div style="display:flex;gap:10px">' +
+                '<button class="neu-btn accent" onclick="aiSuggestBoard()">✨ AI Suggestions</button>' +
+                '<button class="neu-btn accent" onclick="openModal(\'createIssueModal\')">+ Create Issue</button>' +
+            '</div>' +
+        '</div>' +
+        '<div class="board fade-in">' + columnsHtml + '</div>';
+}
+
+// Roadmap
+function renderRoadmap(container) {
+    var projects = [
+        { name: 'Q1 Release', progress: 65, items: 12 },
+        { name: 'Infrastructure Upgrade', progress: 40, items: 8 },
+        { name: 'User Experience Overhaul', progress: 80, items: 15 },
+        { name: 'Security Compliance', progress: 25, items: 6 }
+    ];
+
+    container.innerHTML =
+        '<div class="page-header">' +
+            '<div><h1 class="page-title">Roadmap</h1><p class="page-subtitle">Strategic project timeline and milestones</p></div>' +
+            '<div style="display:flex;gap:10px">' +
+                '<button class="neu-btn accent" onclick="aiScenarioPlan()">✨ AI Scenario Planning</button>' +
+                '<button class="neu-btn accent">+ Add Initiative</button>' +
+            '</div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="fade-in">' +
+            '<div class="neu-card">' +
+                '<div class="neu-card-header"><h3 class="neu-card-title">Active Initiatives</h3></div>' +
+                projects.map(function(p) {
+                    return '<div style="margin-bottom:18px">' +
+                        '<div style="display:flex;justify-content:space-between;margin-bottom:6px">' +
+                            '<span style="font-size:13px;font-weight:600;opacity:0.6">' + p.name + '</span>' +
+                            '<span style="font-size:11px;opacity:0.4">' + p.progress + '% • ' + p.items + ' items</span>' +
+                        '</div>' +
+                        '<div class="roadmap-bar"><div class="roadmap-fill" style="width:' + p.progress + '%">' + p.progress + '%</div></div>' +
+                    '</div>';
+                }).join('') +
+            '</div>' +
+            '<div class="neu-card">' +
+                '<div class="neu-card-header"><h3 class="neu-card-title">Timeline</h3></div>' +
+                '<div class="timeline">' +
+                    ['2024-01-15','2024-01-29','2024-02-12','2024-02-26','2024-03-11','2024-03-25'].map(function(date, i) {
+                        var dotClass = i < 3 ? 'completed' : 'planned';
+                        var status = i < 3 ? 'Completed' : 'Planned';
+                        return '<div class="timeline-item">' +
+                            '<div class="timeline-date">' + date + '</div>' +
+                            '<div class="timeline-content">' +
+                                '<div class="timeline-dot ' + dotClass + '"></div>' +
+                                '<div style="font-size:13px;opacity:0.6">Sprint ' + (24 + i) + ' Milestone</div>' +
+                                '<div style="font-size:11px;opacity:0.4">' + status + '</div>' +
+                            '</div>' +
+                        '</div>';
+                    }).join('') +
+                '</div>' +
+            '</div>' +
+        '</div>';
+}
+
+// Reports
+function renderReports(container) {
+    var velocity = [18, 22, 20, 25, 23, 21, 24, 26, 22, 24];
+    var maxV = Math.max.apply(null, velocity);
+    var types = {};
+    appState.issues.forEach(function(i) { types[i.type] = (types[i.type] || 0) + 1; });
+    var totalEstimate = appState.issues.reduce(function(s, i) { return s + (i.estimate || 0); }, 0);
+    var completedPoints = appState.issues.filter(function(i) { return i.status === 'done'; }).reduce(function(s, i) { return s + (i.estimate || 0); }, 0);
+    var completionPct = totalEstimate ? Math.round((completedPoints / totalEstimate) * 100) : 0;
+    var avgVelocity = Math.round(velocity.reduce(function(s, v) { return s + v; }, 0) / velocity.length);
+    var highOpen = appState.issues.filter(function(i) { return i.priority === 'high' && i.status !== 'done'; }).length;
+
+    var burndown = [25, 20, 18, 15, 12, 10, 8, 5, 3, 1];
+    var maxB = Math.max.apply(null, burndown);
+
+    container.innerHTML =
+        '<div class="page-header">' +
+            '<div><h1 class="page-title">Reports & Analytics</h1><p class="page-subtitle">Performance metrics and predictive insights</p></div>' +
+            '<button class="neu-btn">Export Report</button>' +
+        '</div>' +
+        '<div class="stats-grid fade-in">' +
+            '<div class="stat-card"><div class="stat-icon purple"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div><div><div class="stat-value">' + avgVelocity + '</div><div class="stat-label">Avg Velocity</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon green"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div><div><div class="stat-value">' + completedPoints + '/' + totalEstimate + '</div><div class="stat-label">Points Done</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="stat-value">' + completionPct + '%</div><div class="stat-label">Completion</div></div></div>' +
+            '<div class="stat-card"><div class="stat-icon red"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div><div><div class="stat-value">' + highOpen + '</div><div class="stat-label">High Priority Open</div></div></div>' +
+        '</div>' +
+        '<div class="report-grid fade-in">' +
+            '<div class="neu-card">' +
+                '<div class="neu-card-header"><h3 class="neu-card-title">Velocity Chart</h3></div>' +
+                '<div class="chart-container">' +
+                    velocity.map(function(v, i) {
+                        var h = (v / maxV) * 180;
+                        var bg = i === velocity.length - 1 ? 'var(--accent-light)' : 'var(--accent)';
+                        return '<div class="chart-bar-group"><div class="chart-bar" style="height:' + h + 'px;background:linear-gradient(180deg,' + bg + ',var(--accent))" data-value="' + v + '"></div><div class="chart-label">S' + (24 + i - 9) + '</div></div>';
+                    }).join('') +
+                '</div>' +
+            '</div>' +
+            '<div class="neu-card">' +
+                '<div class="neu-card-header"><h3 class="neu-card-title">Issue Distribution</h3></div>' +
+                '<div style="padding:16px">' +
+                    Object.entries(types).map(function(entry) {
+                        var type = entry[0], count = entry[1];
+                        var pct = Math.round((count / appState.issues.length) * 100);
+                        return '<div style="margin-bottom:14px">' +
+                            '<div style="display:flex;justify-content:space-between;margin-bottom:6px">' +
+                                '<span style="font-size:13px;font-weight:600;opacity:0.6">' + getTypeIcon(type) + ' ' + type + '</span>' +
+                                '<span style="font-size:11px;opacity:0.4">' + count + ' (' + pct + '%)</span>' +
+                            '</div>' +
+                            '<div class="workload-bar"><div class="workload-fill" style="width:' + pct + '%;background:var(--accent)"></div></div>' +
+                        '</div>';
+                    }).join('') +
+                '</div>' +
+            '</div>' +
+            '<div class="neu-card">' +
+                '<div class="neu-card-header"><h3 class="neu-card-title">Burndown Trend</h3></div>' +
+                '<div class="chart-container">' +
+                    burndown.map(function(r, i) {
+                        var h = (r / maxB) * 180;
+                        var bg = i < 7 ? 'var(--success)' : 'var(--warning)';
+                        return '<div class="chart-bar-group"><div class="chart-bar" style="height:' + h + 'px;background:' + bg + '" data-value="' + r + '"></div><div class="chart-label">D' + (i + 1) + '</div></div>';
+                    }).join('') +
+                '</div>' +
+            '</div>' +
+            '<div class="neu-card">' +
+                '<div class="neu-card-header"><h3 class="neu-card-title">Team Workload</h3></div>' +
+                '<div style="padding:8px">' +
+                    Object.entries(appState.users).map(function(entry) {
+                        var id = entry[0], name = entry[1];
+                        var assigned = appState.issues.filter(function(i) { return i.assignee === id && i.status !== 'done'; }).length;
+                        var total = appState.issues.filter(function(i) { return i.assignee === id; }).length;
+                        var pct = total ? Math.round((assigned / total) * 100) : 0;
+                        var barColor = assigned > 3 ? 'var(--danger)' : 'var(--info)';
+                        return '<div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">' +
+                            '<div class="issue-avatar">' + appState.userInitials[id] + '</div>' +
+                            '<div style="flex:1">' +
+                                '<div style="display:flex;justify-content:space-between;margin-bottom:6px">' +
+                                    '<span style="font-size:13px;font-weight:600;opacity:0.6">' + name + '</span>' +
+                                    '<span style="font-size:11px;opacity:0.4">' + assigned + ' active</span>' +
+                                '</div>' +
+                                '<div class="workload-bar"><div class="workload-fill" style="width:' + pct + '%;background:' + barColor + '"></div></div>' +
+                            '</div>' +
+                        '</div>';
+                    }).join('') +
+                '</div>' +
+            '</div>' +
+        '</div>';
+}
+
+// Time Tracking
+function renderTimeTracking(container) {
+    var doneIssues = appState.issues.filter(function(i) { return i.status === 'done'; });
+
+    container.innerHTML =
+        '<div class="page-header">' +
+            '<div><h1 class="page-title">Time Tracking</h1><p class="page-subtitle">Log and monitor time spent on issues</p></div>' +
+            '<button class="neu-btn accent" onclick="logTime()">+ Log Time</button>' +
+        '</div>' +
+        '<div class="neu-card fade-in">' +
+            '<div class="neu-card-header"><h3 class="neu-card-title">Time Log History</h3></div>' +
+            '<table style="width:100%;border-collapse:collapse">' +
+                '<thead><tr style="border-bottom:2px solid var(--shadow-dark)"><th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--text-muted)">Date</th><th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--text-muted)">Issue</th><th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--text-muted)">Hours</th><th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--text-muted)">User</th></tr></thead>' +
+                '<tbody>' +
+                    doneIssues.map(function(i) {
+                        var hrs = Math.floor(Math.random() * 6 + 2);
+                        return '<tr style="border-bottom:1px solid rgba(163,177,198,0.2)"><td style="padding:10px;font-size:13px;opacity:0.5">2024-01-18</td><td style="padding:10px;font-size:13px;opacity:0.6">FT-' + String(i.id).padStart(3, '0') + ': ' + i.title + '</td><td style="padding:10px;font-size:13px;font-weight:600;color:var(--accent)">' + hrs + 'h</td><td style="padding:10px;font-size:13px;opacity:0.5">' + appState.users[i.assignee] + '</td></tr>';
+                    }).join('') +
+                '</tbody>' +
+            '</table>' +
+        '</div>' +
+        '<div class="neu-card fade-in">' +
+            '<div class="neu-card-header"><h3 class="neu-card-title">AI Utilization Insights</h3></div>' +
+            '<div class="insight-card accent" style="margin-bottom:14px">' +
+                '<div class="insight-title">📊 Forecast</div>' +
+                '<div class="insight-text">Based on current pace, the team is on track to complete 85% of sprint capacity by sprint end.</div>' +
+            '</div>' +
+            '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">' +
+                '<div class="neu-card" style="margin:0;text-align:center"><div class="stat-value" style="color:var(--success)">42h</div><div class="stat-label">Logged This Week</div></div>' +
+                '<div class="neu-card" style="margin:0;text-align:center"><div class="stat-value" style="color:var(--warning)">8h</div><div class="stat-label">Remaining Capacity</div></div>' +
+                '<div class="neu-card" style="margin:0;text-align:center"><div class="stat-value" style="color:var(--info)">92%</div><div class="stat-label">Utilization Rate</div></div>' +
+            '</div>' +
+        '</div>';
+}
+
+function logTime() {
+    var hours = prompt('Enter hours spent:');
+    if (hours) {
+        alert('✅ Time logged: ' + hours + ' hours. AI will update velocity projections.');
+    }
+}
+
+// Chat
+function renderChat(container) {
+    container.innerHTML =
+        '<div class="page-header"><div><h1 class="page-title">Team Chat</h1><p class="page-subtitle">Real-time collaboration with AI assistance</p></div></div>' +
+        '<div class="chat-container fade-in">' +
+            '<div class="chat-messages" id="chatMessages">' +
+                appState.messages.map(function(msg) {
+                    var bubbleClass = msg.user === 'AI' ? 'ai-bubble' : (msg.user === 'JD' ? 'self' : '');
+                    var senderName = msg.user === 'AI' ? '🤖 FlowTrack AI' : appState.users[msg.user];
+                    return '<div class="chat-message">' +
+                        '<div class="chat-bubble ' + bubbleClass + '">' +
+                            '<div class="chat-sender">' + senderName + '</div>' +
+                            '<div>' + msg.text + '</div>' +
+                        '</div>' +
+                    '</div>';
+                }).join('') +
+            '</div>' +
+            '<div class="chat-input-area">' +
+                '<input type="text" class="chat-input" id="chatInput" placeholder="Type a message or ask AI..." onkeypress="if(event.key===\'Enter\')sendMessage()">' +
+                '<button class="neu-btn accent" onclick="sendMessage()">Send</button>' +
+            '</div>' +
+        '</div>';
+
+    var msgContainer = document.getElementById('chatMessages');
+    if (msgContainer) msgContainer.scrollTop = msgContainer.scrollHeight;
+}
+
+function sendMessage() {
+    var input = document.getElementById('chatInput');
+    if (!input) return;
+    var text = input.value.trim();
+    if (!text) return;
+
+    appState.messages.push({ id: Date.now(), user: 'JD', text: text, time: new Date().toLocaleTimeString() });
+    input.value = '';
+    renderContent();
+
+    setTimeout(function() {
+        var lowerText = text.toLowerCase();
+        if (lowerText.indexOf('ai') !== -1 || lowerText.indexOf('help') !== -1 || lowerText.indexOf('status') !== -1) {
+            appState.messages.push({ id: Date.now() + 1, user: 'AI', text: '🤖 Based on your query, I recommend reviewing the Sprint Board for real-time status updates. I can also generate a summary report or suggest task assignments.', time: new Date().toLocaleTimeString() });
+        } else {
+            appState.messages.push({ id: Date.now() + 1, user: 'AS', text: 'Got it! I\'ll handle that right away. 👍', time: new Date().toLocaleTimeString() });
+        }
+        renderContent();
+    }, 800);
+}
+
+// Automations
+function renderAutomations(container) {
+    container.innerHTML =
+        '<div class="page-header">' +
+            '<div><h1 class="page-title">Automation Rules</h1><p class="page-subtitle">No-code workflow automation builder</p></div>' +
+            '<div style="display:flex;gap:10px">' +
+                '<button class="neu-btn accent">✨ AI Suggestions</button>' +
+                '<button class="neu-btn accent">+ Create Rule</button>' +
+            '</div>' +
+        '</div>' +
+        '<div style="display:flex;flex-direction:column;gap:16px;padding:0" class="fade-in">' +
+            appState.automationRules.map(function(rule, idx) {
+                return '<div class="automation-step" style="border-left-color:' + rule.color + '">' +
+                    '<div class="automation-icon" style="color:' + rule.color + '">' + rule.icon + '</div>' +
+                    '<div style="flex:1">' +
+                        '<div style="font-size:14px;font-weight:600;opacity:0.6">' + rule.name + '</div>' +
+                        '<div style="font-size:12px;opacity:0.4;margin-top:2px">' + rule.desc + '</div>' +
+                    '</div>' +
+                    '<div class="toggle-switch ' + (rule.enabled ? 'active' : '') + '" onclick="toggleAutomation(' + idx + ', this)"></div>' +
+                '</div>';
+            }).join('') +
+            '<div class="automation-arrow">↓</div>' +
+            '<div class="automation-step" style="border-left-color:var(--shadow-dark);opacity:0.5">' +
+                '<div class="automation-icon" style="font-size:24px;color:var(--text-muted)">+</div>' +
+                '<div style="flex:1;cursor:pointer" onclick="alert(\'Rule builder coming soon!\')"><div style="font-size:14px;font-weight:600;color:var(--accent)">Add new rule</div></div>' +
+            '</div>' +
+        '</div>' +
+        '<div class="neu-card fade-in" style="margin-top:20px">' +
+            '<div class="neu-card-header"><h3 class="neu-card-title">AI Automation Insights</h3></div>' +
+            '<div class="insight-card success" style="margin-bottom:10px">✅ 3 rules saved 4.2 hours this sprint</div>' +
+            '<div class="insight-card info">💡 Suggestion: Create a rule to auto-prioritize high-impact issues based on customer feedback</div>' +
+        '</div>';
+}
+
+function toggleAutomation(idx, el) {
+    appState.automationRules[idx].enabled = !appState.automationRules[idx].enabled;
+    el.classList.toggle('active');
+}
+
+// Templates
+function renderTemplates(container) {
+    var templates = [
+        { name: 'Scrum Software Project', desc: 'Standard Scrum with backlog, sprints, and reports', icon: '🏃' },
+        { name: 'Kanban Operations', desc: 'Continuous flow workflow for IT ops teams', icon: '📋' },
+        { name: 'Bug Tracking', desc: 'Streamlined bug reporting and triage process', icon: '🐛' },
+        { name: 'Product Launch', desc: 'Marketing and development coordination', icon: '🚀' },
+        { name: 'Agile Release Train', desc: 'SAFe framework for large-scale agile', icon: '🚂' },
+        { name: 'Design Sprint', desc: '5-day design process template', icon: '🎨' },
+        { name: 'DevOps Pipeline', desc: 'CI/CD monitoring and incident management', icon: '⚙️' },
+        { name: 'Marketing Campaign', desc: 'Campaign planning and execution tracker', icon: '📢' }
+    ];
+
+    container.innerHTML =
+        '<div class="page-header"><div><h1 class="page-title">Project Templates</h1><p class="page-subtitle">Start fast with proven configurations</p></div></div>' +
+        '<div class="template-grid fade-in">' +
+            templates.map(function(t) {
+                return '<div class="template-card" onclick="useTemplate(\'' + t.name + '\')">' +
+                    '<div class="template-icon">' + t.icon + '</div>' +
+                    '<div class="template-name">' + t.name + '</div>' +
+                    '<div class="template-desc">' + t.desc + '</div>' +
+                '</div>';
+            }).join('') +
+        '</div>';
+}
+
+function useTemplate(name) {
+    alert('✅ Template "' + name + '" applied! Project configured with best practices.');
+}
+
+// Modals
+function openModal(id) { document.getElementById(id).classList.add('active'); }
+function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+function createIssue() {
+    var title = document.getElementById('issueTitle').value.trim();
+    var desc = document.getElementById('issueDesc').value.trim();
+    var type = document.getElementById('issueType').value;
+    var priority = document.getElementById('issuePriority').value;
+    var assignee = document.getElementById('issueAssignee').value;
+    var sprint = document.getElementById('issueSprint').value;
+    var estimateVal = document.getElementById('issueEstimate').value;
+
+    if (!title) { alert('Please enter a title'); return; }
+
+    var newIssue = {
+        id: appState.nextId++,
+        title: title,
+        desc: desc,
+        type: type,
+        priority: priority,
+        assignee: assignee,
+        status: 'todo',
+        sprint: sprint === 'current' ? 'current' : 'backlog',
+        estimate: parseInt(estimateVal) || 0,
+        created: new Date().toISOString().split('T')[0],
+        comments: []
+    };
+
+    appState.issues.push(newIssue);
+    saveData();
+    closeModal('createIssueModal');
+
+    document.getElementById('issueTitle').value = '';
+    document.getElementById('issueDesc').value = '';
+    document.getElementById('issueEstimate').value = '';
+
+    renderContent();
+}
+
+function openIssueDetail(id) {
+    var issue = appState.issues.find(function(i) { return i.id === id; });
+    if (!issue) return;
+    window.currentIssue = issue;
+    document.getElementById('detailTitle').textContent = 'FT-' + String(issue.id).padStart(3, '0') + ': ' + issue.title;
+    openModal('issueDetailModal');
+    switchDetailTab('details', document.querySelector('#detailTabs .tab[data-tab="details"]'));
+}
+
+function switchDetailTab(tab, tabEl) {
+    document.querySelectorAll('#detailTabs .tab').forEach(function(t) { t.classList.remove('active'); });
+    if (tabEl) tabEl.classList.add('active');
+
+    var content = document.getElementById('detailContent');
+    var issue = window.currentIssue;
+    if (!issue) return;
+
+    switch(tab) {
+        case 'details':
+            content.innerHTML =
+                '<div class="form-group"><label class="form-label">Description</label><div style="padding:14px;background:var(--bg);border-radius:var(--radius-sm);box-shadow:var(--neu-pressed);font-size:13px;opacity:0.6">' + (issue.desc || 'No description') + '</div></div>' +
+                '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">' +
+                    '<div><div class="form-label">Status</div><select class="form-select" onchange="updateStatus(' + issue.id + ', this.value)">' +
+                        appState.columns.map(function(c) { return '<option value="' + c + '"' + (issue.status === c ? ' selected' : '') + '>' + appState.columnNames[c] + '</option>'; }).join('') +
+                    '</select></div>' +
+                    '<div><div class="form-label">Assignee</div><div style="display:flex;align-items:center;gap:8px;padding:10px;background:var(--bg);border-radius:var(--radius-sm);box-shadow:var(--neu-pressed)"><div class="issue-avatar">' + appState.userInitials[issue.assignee] + '</div><span style="font-size:13px;opacity:0.6">' + appState.users[issue.assignee] + '</span></div></div>' +
+                    '<div><div class="form-label">Priority</div><span class="issue-priority priority-' + issue.priority + '">' + issue.priority + '</span></div>' +
+                    '<div><div class="form-label">Story Points</div><div style="padding:10px;background:var(--bg);border-radius:var(--radius-sm);box-shadow:var(--neu-pressed);font-size:14px;opacity:0.6">' + (issue.estimate || '0') + '</div></div>' +
+                '</div>';
+            break;
+        case 'comments':
+            content.innerHTML =
+                '<div style="max-height:300px;overflow-y:auto;margin-bottom:16px;padding-right:4px">' +
+                    (issue.comments.length === 0 ? '<div style="text-align:center;padding:30px;opacity:0.4;font-size:13px">No comments yet</div>' :
+                    issue.comments.map(function(c) {
+                        return '<div style="margin-bottom:12px;padding:12px;background:var(--bg);border-radius:var(--radius-sm);box-shadow:var(--neu-pressed)"><div style="font-size:11px;font-weight:700;margin-bottom:4px;opacity:0.5">' + c.user + '</div><div style="font-size:13px;opacity:0.6">' + c.text + '</div></div>';
+                    }).join('')) +
+                '</div>' +
+                '<div style="display:flex;gap:10px"><input type="text" class="chat-input" style="flex:1" placeholder="Add a comment..." id="commentInput" onkeypress="if(event.key===\'Enter\')addComment(' + issue.id + ')"><button class="neu-btn accent" onclick="addComment(' + issue.id + ')">Send</button></div>';
+            break;
+        case 'history':
+            content.innerHTML =
+                '<div class="timeline">' +
+                    '<div class="timeline-item"><div class="timeline-date">' + issue.created + '</div><div class="timeline-content"><div class="timeline-dot completed"></div><div style="font-size:13px;opacity:0.6">Issue created</div></div></div>' +
+                    '<div class="timeline-item"><div class="timeline-date">2024-01-16</div><div class="timeline-content"><div class="timeline-dot"></div><div style="font-size:13px;opacity:0.6">Assigned to ' + appState.users[issue.assignee] + '</div></div></div>' +
+                    '<div class="timeline-item"><div class="timeline-date">2024-01-17</div><div class="timeline-content"><div class="timeline-dot"></div><div style="font-size:13px;opacity:0.6">Status changed to ' + appState.columnNames[issue.status] + '</div></div></div>' +
+                '</div>';
+            break;
+        case 'ai':
+            var prob = Math.floor(Math.random() * 40 + 60);
+            content.innerHTML =
+                '<div class="ai-badge" style="margin-bottom:14px">✨ AI Analysis</div>' +
+                '<div class="insight-card accent" style="margin-bottom:12px">' +
+                    '<div class="insight-title">🎯 Completion Probability</div>' +
+                    '<div class="insight-text">Based on complexity, team velocity, and current sprint load: <strong>' + prob + '%</strong> chance of completion by sprint end.</div>' +
+                '</div>' +
+                '<div class="insight-card warning" style="margin-bottom:12px">' +
+                    '<div class="insight-title">⚠️ Dependencies Detected</div>' +
+                    '<div class="insight-text">This issue may be blocked by FT-003 (Setup CI/CD Pipeline). Consider addressing first.</div>' +
+                '</div>' +
+                '<div class="insight-card success">' +
+                    '<div class="insight-title">💡 AI Recommendation</div>' +
+                    '<div class="insight-text">Break this into 2-3 smaller subtasks for better tracking and faster delivery.</div>' +
+                '</div>' +
+                '<button class="neu-btn accent" style="width:100%;margin-top:14px" onclick="alert(\'AI has generated subtasks and updated the backlog!\')">Apply AI Suggestions</button>';
+            break;
+    }
+}
+
+function updateStatus(id, status) {
+    var issue = appState.issues.find(function(i) { return i.id === id; });
+    if (issue) {
+        issue.status = status;
+        saveData();
+        renderContent();
+    }
+}
+
+function addComment(issueId) {
+    var input = document.getElementById('commentInput');
+    if (!input) return;
+    var text = input.value.trim();
+    if (!text) return;
+    var issue = appState.issues.find(function(i) { return i.id === issueId; });
+    if (issue) {
+        issue.comments.push({ user: 'John Doe', text: text, time: new Date().toISOString() });
+        saveData();
+        switchDetailTab('comments', document.querySelector('#detailTabs .tab[data-tab="comments"]'));
+    }
+}
+
+// AI Features
+function aiPrioritize() {
+    appState.issues.sort(function(a, b) {
+        var pScore = { high: 3, medium: 2, low: 1 };
+        return (pScore[b.priority] || 0) - (pScore[a.priority] || 0);
+    });
+    saveData();
+    renderContent();
+    alert('✨ AI has re-prioritized the backlog based on impact, urgency, and dependencies.');
+}
+
+function aiSuggestBoard() {
+    alert('💡 AI Suggestions:\n\n• FT-004 has low complexity — consider pulling into current sprint\n• FT-007 (Epic) should be split before sprint start\n• Team velocity suggests adding 3 more story points is safe');
+}
+
+function aiScenarioPlan() {
+    alert('📊 AI Scenario Planning:\n\nScenario A (Aggressive): +20% scope, 65% completion risk\nScenario B (Balanced): Current scope, 92% completion probability\nScenario C (Conservative): -15% scope, 99% completion probability\n\nRecommended: Scenario B with minor scope adjustments.');
+}
+
+function showAIAssistant() {
+    alert('🤖 FlowTrack AI Assistant\n\nHow can I help you today?\n\n• Summarize sprint progress\n• Suggest task assignments\n• Predict delivery dates\n• Analyze bottlenecks\n• Generate reports');
+}
+
+function showNotifications() {
+    alert('🔔 Notifications\n\n• 3 new comments on your issues\n• Sprint review in 2 days\n• Build pipeline succeeded\n• Alice requested code review');
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+    overlay.addEventListener('click', function(e) {
+        if (e.target === overlay) {
+            overlay.classList.remove('active');
+        }
+    });
+});
+
+// Initialize App
+initApp();
+</script>
+</body>
+</html>
+
