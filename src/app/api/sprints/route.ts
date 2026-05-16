@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { db, ensureSeeded } from '@/lib/db'
 
 export async function GET() {
   try {
+    await ensureSeeded()
     const sprints = await db.sprint.findMany({
       include: {
         issues: { select: { id: true, status: true, estimate: true } },
@@ -18,6 +19,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureSeeded()
     const body = await request.json()
     const { name, goal, startDate, endDate, status } = body
 

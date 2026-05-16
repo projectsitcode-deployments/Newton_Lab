@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { db, ensureSeeded } from '@/lib/db'
 
 export async function GET() {
   try {
+    await ensureSeeded()
     const totalIssues = await db.issue.count()
     const doneIssues = await db.issue.count({ where: { status: 'done' } })
     const inProgress = await db.issue.count({ where: { status: 'inprogress' } })

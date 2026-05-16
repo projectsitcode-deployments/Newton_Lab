@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { db, ensureSeeded } from '@/lib/db'
 
 export async function GET() {
   try {
+    await ensureSeeded()
     const users = await db.user.findMany({
       include: {
         assignedIssues: {

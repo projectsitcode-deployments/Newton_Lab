@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { db, ensureSeeded } from '@/lib/db'
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await ensureSeeded()
     const { id } = await params
     const issue = await db.issue.findUnique({
       where: { id },
@@ -43,8 +44,8 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    await ensureSeeded()
     const { id } = await params
-    const body = await request.json()
 
     const issue = await db.issue.findUnique({ where: { id } })
     if (!issue) {

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { db, ensureSeeded } from '@/lib/db'
 
 export async function GET() {
   try {
+    await ensureSeeded()
     const timeLogs = await db.timeLog.findMany({
       include: {
         user: { select: { id: true, name: true, initials: true, avatarColor: true } },

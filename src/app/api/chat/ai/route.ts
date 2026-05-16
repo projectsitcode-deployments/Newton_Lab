@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { db } from '@/lib/db'
+import { db, ensureSeeded } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
+    await ensureSeeded()
     const { message, issueContext } = await request.json()
 
     // Get project context for AI
